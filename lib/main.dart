@@ -42,29 +42,22 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
     for (int i = 0; i < expr.length; i++) {
       final char = expr[i];
       final prev = i > 0 ? expr[i - 1] : null;
-
-      // Insertar * antes de '(' si antes hay número, punto o ')'
       if (char == '(' && prev != null && RegExp(r'[1-9.)]').hasMatch(prev)) {
         buffer.write('*');
       }
-
-      // Insertar * después de ')' si después hay número, punto o '('
       if (prev == ')' && RegExp(r'[1-9(]').hasMatch(char)) {
         buffer.write('*');
       }
-
       buffer.write(char);
     }
     return buffer.toString();
   }
-
-  // Nueva función: verifica balance de paréntesis
   bool _areParenthesesBalanced(String expr) {
     int count = 0;
     for (var char in expr.runes) {
       if (char == '('.codeUnitAt(0)) count++;
       if (char == ')'.codeUnitAt(0)) count--;
-      if (count < 0) return false; // más cierres que aperturas
+      if (count < 0) return false;
     }
     return count == 0;
   }
@@ -77,15 +70,12 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
 
   void _onButtonPressed(String value) {
     setState(() {
-      // Limpiar todo
       if (value == 'AC') {
         currentInput = '0';
         currentExpression = '';
         result = '';
         return;
       }
-
-      // Borrar último dígito del input actual
       if (value == 'DEL') {
         if (currentInput.length > 1) {
           currentInput = currentInput.substring(0, currentInput.length - 1);
@@ -94,8 +84,6 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         }
         return;
       }
-
-      // Evaluar
       if (value == '=') {
         String fullExpr = currentExpression + currentInput;
         fullExpr = fullExpr
@@ -104,10 +92,9 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
             .replaceAll(' ', '');
         fullExpr = _preprocessImplicitMultiplication(fullExpr);
 
-        print('Evaluando: $fullExpr'); // ← para depurar
+        print('Evaluando: $fullExpr');
 
         try {
-          // Verificación de paréntesis
           int balance = 0;
           for (var c in fullExpr.runes) {
             if (c == '('.codeUnitAt(0)) balance++;
@@ -131,16 +118,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         }
         return;
       }
-
-      // Operadores binarios
       if ('+-x/'.contains(value)) {
-        // Si hay input pendiente, agregarlo
         if (currentInput.isNotEmpty && currentInput != '0') {
           currentExpression += currentInput;
           currentInput = '';
         }
-
-        // Si el último es operador, reemplazar
         if (currentExpression.isNotEmpty &&
             '+-x/'.contains(currentExpression.trim().characters.last)) {
           currentExpression =
@@ -151,40 +133,26 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
         }
         return;
       }
-
-      // Paréntesis
       if (value == '(' || value == ')') {
-        // Multiplicación implícita antes de '(' si hay número previo
         if (value == '(' && currentInput.isNotEmpty && currentInput != '0') {
           currentExpression += currentInput + ' * ';
           currentInput = '';
         }
-
-        // Antes de agregar cualquier paréntesis, aseguramos que el input pendiente se añada
         if (currentInput.isNotEmpty && currentInput != '0') {
           currentExpression += currentInput;
           currentInput = '';
         }
-
-        // Agregar el paréntesis
         currentExpression += value;
-
-        // Después de cerrar ')', limpiar para que el siguiente número u operador empiece fresco
         if (value == ')') {
           currentInput = '';
         }
-
         return;
       }
-
-      // Punto
       if (value == '.') {
         if (currentInput.contains('.') || currentInput.isEmpty) return;
         currentInput += value;
         return;
       }
-
-      // Números
       if (currentInput == '0' || currentInput.isEmpty) {
         currentInput = value;
       } else {
@@ -256,10 +224,10 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       padding: const EdgeInsets.symmetric(
         horizontal: 16.0,
         vertical: 8.0,
-      ), // ← más padding lateral para no pegarse
+      ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment
-            .spaceEvenly, // ← distribuye mejor el espacio vertical
+            .spaceEvenly,
         children: [
           Row(
             children: [
@@ -326,7 +294,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
       padding: const EdgeInsets.all(16.0),
       child: GridView.count(
         crossAxisCount: 5,
-        childAspectRatio: 1.4, // ← ajustado para botones más equilibrados
+        childAspectRatio: 1.4,
         mainAxisSpacing: 12,
         crossAxisSpacing: 12,
         children: [
@@ -335,19 +303,16 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
           _button('('),
           _button(')'),
           _button('/'),
-
           _button('7'),
           _button('8'),
           _button('9'),
           _button('x'),
           _button('-'),
-
           _button('4'),
           _button('5'),
           _button('6'),
           _button('1'),
           _button('2'),
-
           _button('3'),
           _button('0'),
           _button('.'),
@@ -377,7 +342,7 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   Expanded(
                     flex: 6,
                     child: _buildPortraitKeyboard(),
-                  ), // ← más espacio para teclado
+                  ),
                 ],
               );
             } else {
@@ -386,11 +351,11 @@ class _CalculatorScreenState extends State<CalculatorScreen> {
                   Expanded(
                     flex: 3,
                     child: _buildDisplay(),
-                  ), // ← display más pequeño en horizontal
+                  ),
                   Expanded(
                     flex: 7,
                     child: _buildLandscapeKeyboard(),
-                  ), // ← teclado ocupa más espacio
+                  ),
                 ],
               );
             }
